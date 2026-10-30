@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#050505">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Painel Lucasffx</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #050505;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Canvas para as partículas */
+        #particles-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        /* Container Principal */
+        .main-container {
+            position: relative;
+            z-index: 1;
+            width: 90%;
+            max-width: 400px;
+            background: rgba(15, 15, 15, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 136, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        /* Menu de Abas */
+        .tabs {
+            display: flex;
+            background: #0a0a0a;
+            border-radius: 12px;
+            border: 1px solid #222;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 15px 0;
+            background: transparent;
+            border: none;
+            color: #666;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        .tab-btn.active {
+            color: #0088ff;
+            background: rgba(0, 136, 255, 0.1);
+            border-radius: 12px;
+        }
+
+        /* Conteúdo das Abas */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Itens de Função */
+        .function-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #0f0f0f;
+            border: 1px solid #222;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: 0.3s;
+        }
+
+        .function-item.active-border {
+            border-color: rgba(0, 136, 255, 0.5);
+            box-shadow: 0 0 10px rgba(0, 136, 255, 0.15);
+        }
+
+        .item-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .icon-box {
+            width: 45px;
+            height: 45px;
+            background: #1a1a1a;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid #222;
+            color: #666;
+            transition: 0.3s;
+        }
+
+        .function-item.active-border .icon-box {
+            color: #0088ff;
+            background: rgba(0, 136, 255, 0.1);
+            border-color: rgba(0, 136, 255, 0.3);
+        }
+
+        .icon-box svg {
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
+        }
+
+        .item-text h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 2px;
+        }
+
+        .item-text p {
+            font-size: 12px;
+            color: #888;
+            font-weight: 400;
+        }
+
+        /* Switch Toggle */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #333;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #0088ff;
+            box-shadow: 0 0 10px rgba(0, 136, 255, 0.5);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        /* Tela Info */
+        .info-content {
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        .info-content h2 {
+            color: #0088ff;
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 25px;
+        }
+
+        .info-line {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .info-line span {
+            color: #0088ff;
+        }
+        
+        .info-line svg {
+            width: 20px;
+            height: 20px;
+            fill: #fff;
+        }
+
+        /* Botão Abrir FF */
+        .btn-open {
+            width: 100%;
+            padding: 18px;
+            background: #0088ff;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(0, 136, 255, 0.4);
+        }
+
+        .btn-open:active {
+            transform: scale(0.98);
+            background: #0066cc;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="particles-canvas"></canvas>
+
+    <div class="main-container">
+        <!-- Menu de Abas -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab(0)">
+                <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                Funções
+            </button>
+            <button class="tab-btn" onclick="switchTab(1)">
+                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                Info
+            </button>
+        </div>
+
+        <!-- Conteúdo: Funções -->
+        <div class="tab-content active" id="tab-funcoes">
+            <!-- Item 1 (Aimbot) -->
+            <div class="function-item" id="item-aimbot">
+                <div class="item-left">
+                    <div class="icon-box">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-13c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 8c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"/></svg>
+                    </div>
+                    <div class="item-text">
+                        <h3>Aimbot</h3>
+                        <p>Puxa mais para a cabeça</p>
+                    </div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" onchange="toggleFunction('item-aimbot', this, 'aimbot')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <!-- Item 2 (Diminuir Recuo) -->
+            <div class="function-item" id="item-recuo">
+                <div class="item-left">
+                    <div class="icon-box">
+                        <svg viewBox="0 0 24 24"><path d="M21.5 12.5l-3.5-1v-2l3.5-1V6l-9 4H4c-1.1 0-2 .9-2 2v4c0 1.1.9 2 2 2h4v2h2v-2h6.5l2.5 1.5v2H21v-2h1.5v-4zM4 14v-2h4v2H4z"/></svg>
+                    </div>
+                    <div class="item-text">
+                        <h3>Diminuir Recuo</h3>
+                        <p>Estabiliza a mira no alvo</p>
+                    </div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" onchange="toggleFunction('item-recuo', this, 'sensibilidade')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <!-- Item 3 (Otimizar Jogo) -->
+            <div class="function-item" id="item-otimizar">
+                <div class="item-left">
+                    <div class="icon-box">
+                        <svg viewBox="0 0 24 24"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg>
+                    </div>
+                    <div class="item-text">
+                        <h3>Otimizar Jogo</h3>
+                        <p>Melhora FPS e performance</p>
+                    </div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" onchange="toggleFunction('item-otimizar', this, 'otimizar')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <!-- O botão agora chama a função que tenta abrir o app -->
+            <button class="btn-open" onclick="abrirFF()">ABRIR FF</button>
+        </div>
+
+        <!-- Conteúdo: Info -->
+        <div class="tab-content" id="tab-info">
+            <div class="info-content">
+                <h2>Sobre o Projeto</h2>
+                <div class="info-line">
+                    <svg viewBox="0 0 24 24"><path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6-4.8-6 4.8 2.4-7.2-6-4.8h7.6z"/></svg>
+                    Criador: <span>Lucasffx</span>
+                </div>
+            </div>
+            <button class="btn-open" onclick="abrirFF()">ABRIR FF</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Lógica das Partículas de Fundo ---
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let particlesArray = [];
+        const numberOfParticles = 40;
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', function() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            init();
+        });
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 1;
+                this.speedX = Math.random() * 1 - 0.5;
+                this.speedY = Math.random() * 1 - 0.5;
+                this.color = '#0088ff';
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.x > canvas.width) this.x = 0;
+                else if (this.x < 0) this.x = canvas.width;
+                if (this.y > canvas.height) this.y = 0;
+                else if (this.y < 0) this.y = canvas.height;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function init() {
+            particlesArray = [];
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+
+        function connect() {
+            for (let a = 0; a < particlesArray.length; a++) {
+                for (let b = a; b < particlesArray.length; b++) {
+                    let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x)) + 
+                                   ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
+                    if (distance < (canvas.width / 10) * (canvas.height / 10)) {
+                        let opacityValue = 1 - (distance / 20000);
+                        ctx.strokeStyle = 'rgba(0, 136, 255, ' + opacityValue + ')';
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+            }
+            connect();
+        }
+
+        init();
+        animate();
+
+        // --- Lógica de Navegação das Abas ---
+        function switchTab(index) {
+            const tabs = document.querySelectorAll('.tab-btn');
+            const contents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+            
+            tabs[index].classList.add('active');
+            contents[index].classList.add('active');
+        }
+
+        // --- Lógica para Ativar/Desativar as Funções ---
+        function toggleFunction(itemId, checkbox, type) {
+            const item = document.getElementById(itemId);
+            
+            if (checkbox.checked) {
+                item.classList.add('active-border');
+                
+                if (type === 'aimbot') {
+                    setTimeout(() => alert("Aimbot 78% Ativado!\nMira grudar force 78% na cabeça."), 100);
+                } 
+                else if (type === 'sensibilidade') {
+                    setTimeout(() => alert("Sensibilidade Force 60% Ativada!\nMira pesada grudando."), 100);
+                }
+            } else {
+                item.classList.remove('active-border');
+            }
+        }
+
+        // --- NOVA FUNÇÃO: Abrir Free Fire via URL Scheme ---
+        function abrirFF() {
+            // O esquema "freefire://" é o padrão do app no Android.
+            const urlFreeFire = "freefire://";
+            
+            // Cria um link temporário oculto para forçar o celular a abrir o app
+            const link = document.createElement('a');
+            link.href = urlFreeFire;
+            link.style.display = 'none';
+            
+            // Adiciona ao corpo do documento
+            document.body.appendChild(link);
+            
+            // Simula o clique
+            link.click();
+            
+            // Remove o link depois de usado para não sujar o HTML
+            document.body.removeChild(link);
+
+            // Opcional: Fallback se o app não abrir
+            // Se o navegador estiver no iPhone e bloquear, ou se o FF não estiver instalado
+            setTimeout(() => {
+                // Isso apenas evita que a tela fique "morta" se o app não abrir
+                // Não é um alerta chato, é só um log no console.
+                console.log("Tentativa de abrir o Free Fire finalizada.");
+            }, 1500);
+        }
+    </script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("service-worker.js")
+        .then(() => console.log("Service Worker registrado com sucesso!"))
+        .catch((error) => console.error("Erro ao registrar Service Worker:", error));
+    }
+  </script>
+</body>
+</html>
